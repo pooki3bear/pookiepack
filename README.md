@@ -7,7 +7,7 @@ PookiePack is a set of powershell configuration scripts configure a Windows10 sy
 1. press windows key
 2. type 'powershell.exe' > right-click, select 'Run as Administrator'
 3. cd to the directory you extracted the files to (e.g. 'cd C:\pp-master')
-4. type 'set-executionpolicy remotesigned' in the prompt and hit enter enter 'A' afterwards
+4. type 'set-executionpolicy unrestricted' in the prompt and hit enter enter 'A' afterwards
 5. type '.\get-pp.ps1 -install' and hit enter (or -remove to remove)
 6. SIT BACK!
 7. type 'restart-computer' in the powershell prompt, or reboot via other means
