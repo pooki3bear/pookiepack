@@ -1,4 +1,4 @@
-# Welcome to PookiePack!!!
+# PookiePack
 
 PookiePack is a set of powershell configuration scripts configure a Windows10 system with reasonably secure defaults.
 
