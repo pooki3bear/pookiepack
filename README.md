@@ -16,9 +16,8 @@ If you decide PookiePack is not the protection profile for you, you can uninstal
 
 PookiePack currently leverages the following 3rd party tools:
 
-1. Blackbird to disable windows 10 telemetry, block ad domains, etc: http://www.getblackbird.net/
-2. Microsoft EMET 5.5: https://www.microsoft.com/en-us/download/details.aspx?id=50766
-3. Sysinternals Suite:https://technet.microsoft.com/en-us/sysinternals/bb842062.aspx - https://github.com/SwiftOnSecurity/sysmon-config is applied as the baseline.
+1. Microsoft EMET 5.5: https://www.microsoft.com/en-us/download/details.aspx?id=50766
+2. Sysinternals Suite:https://technet.microsoft.com/en-us/sysinternals/bb842062.aspx - https://github.com/SwiftOnSecurity/sysmon-config is applied as the baseline.
 
 Lots of guidance considered and applied from:
 
@@ -29,3 +28,5 @@ http://adsecurity.org/?p=3299
 https://iwrconsultancy.co.uk/softwarepolicy
 
 https://www.malwarearchaeology.com/logging/
+
+https://gist.github.com/halkyon/b73fb75e61c37b7ba5f65bb6f3979f00
