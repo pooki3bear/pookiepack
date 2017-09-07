@@ -68,16 +68,14 @@ function install(){
     set-compbrows
     set-llmnr
     set-font
-    set-explore
     set-network
     set-odns
     set-log
     set-ftype
     set-emet -command install
-    set-bb
+    set-teloff
     & $wd\srp.ps1 set
     Set-ItemProperty -Path HKLM:\SOFTWARE\SRPBAK\software -Name "PPState" -Value "1" -Force
-    Wait-Process -Id (Get-Process -Name blackbird).Id
     Write-Host "Great, you should now have pookiepack installed!"
     Write-Host "You can 'unlock' the software policy by running the 'srp-off' shortcut and entering an admin password"
     Write-Host "Once system changes are made, lock the computer again by running the 'srp-on' shortcut"
@@ -87,18 +85,17 @@ function install(){
 function uninstall(){
     & $wd\srp.ps1 unset
     clear-psv2
-    clear-explore
     clear-wpad
     clear-wdigest
     clear-netbios
     clear-compbrows
     clear-llmnr
     clear-font
-    clear-bb
     set-emet -command uninstall
     clear-log
     clear-network
     clear-odns
+    set-telon
     Set-ItemProperty -Path HKLM:\SOFTWARE\SRPBAK\software -Name "PPState" -Value "0" -Force
     Write-Host ""
     Write-Host ""
