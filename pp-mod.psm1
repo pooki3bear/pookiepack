@@ -744,7 +744,7 @@ powercfg -h off
 Write-Host 'Disabling optional features...'
 $features = @(
     'MediaPlayback',
-    'SMB1Protocol',
+    #'SMB1Protocol',
     'Xps-Foundation-Xps-Viewer',
     'WorkFolders-Client',
     #'WCF-Services45',
@@ -907,7 +907,7 @@ powercfg -h off
 Write-Host 'Disabling optional features...'
 $features = @(
     'MediaPlayback',
-    'SMB1Protocol',
+    #'SMB1Protocol',
     'Xps-Foundation-Xps-Viewer',
     'WorkFolders-Client',
     'WCF-Services45',

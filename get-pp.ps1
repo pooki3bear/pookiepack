@@ -65,7 +65,7 @@ function install(){
     set-wpad
     set-wdigest
     set-netbios
-    set-compbrows
+    #set-compbrows
     set-llmnr
     set-font
     set-network
@@ -88,7 +88,7 @@ function uninstall(){
     clear-wpad
     clear-wdigest
     clear-netbios
-    clear-compbrows
+    #clear-compbrows
     clear-llmnr
     clear-font
     set-emet -command uninstall
