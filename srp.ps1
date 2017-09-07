@@ -30,7 +30,8 @@ $global_whitelist = "C:\Program Files (x86)",
 "C:\Windows\SysWOW64\*.exe",
 "C:\boot\",
 $wd,
-"$env:TEMP"
+"$env:TEMP\*.ps1",
+"$env:TEMP\*.psm1"
 
 $global_blacklist = "C:\Windows\debug\WIA",
 "C:\Windows\Registration\CRMLog",
