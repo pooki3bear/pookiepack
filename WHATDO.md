@@ -1,8 +1,8 @@
-# PookiePack detailed description
+# PookiePack Detailed Description
 
 ## What does PookiePack do?
 
-Creates a restore point so the user can roll back
+Creates a restore point so the user can roll back.
 
 Configure explorer.exe properly: enables hidden files, always shows file extension, etc
 Configure default launch options for dangerous file types to open in sublime, N++, or notepad.exe
