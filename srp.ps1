@@ -258,7 +258,7 @@ function set-shortcut($shortcutname, $action){
     $shell = New-Object -COM WScript.Shell
     $shortcut = $shell.CreateShortcut($shortcutname)
     $shortcut.TargetPath = 'C:\windows\system32\windowspowershell\v1.0\powershell.exe'  ## Target Powershell
-    $string = "Start-Process powershell.exe -argumentlist '-file "$action"' -Verb RunAs"
+    $string = "Start-Process powershell.exe -argumentlist '-file $action' -Verb RunAs"
     $shortcut.Arguments = "$string"
     $shortcut.Description = "Super Safe Shortcut"  ## This is the "Comment" field
     $shortcut.Save()  ## Savep
@@ -279,9 +279,9 @@ function set-srp(){
         make-key -codepath $_ -guid (get-guidz -rnum 1) -act 0
     }
     set-enablekey
-    set-shortcut -shortcutname "$env:ALLUSERSPROFILE\desktop\srp-on.lnk" -action "$wd\srp.ps1 tog-on"
-    set-shortcut -shortcutname "$env:ALLUSERSPROFILE\desktop\srp-off.lnk" -action "$wd\srp.ps1 tog-off"
-    set-shortcut -shortcutname "$env:ALLUSERSPROFILE\desktop\srp-set.lnk" -action "$wd\srp.ps1 set"
+    set-shortcut -shortcutname "$env:ALLUSERSPROFILE\desktop\srp-on.lnk" -action '"$wd\srp.ps1" tog-on'
+    set-shortcut -shortcutname "$env:ALLUSERSPROFILE\desktop\srp-off.lnk" -action '"$wd\srp.ps1" tog-off'
+    set-shortcut -shortcutname "$env:ALLUSERSPROFILE\desktop\srp-set.lnk" -action '"$wd\srp.ps1" set'
     reg add "HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings" /t REG_DWORD /v "Enabled" /d "0" /f
     backup-srp
     Set-ItemProperty -Path HKLM:\SOFTWARE\SRPBAK\software -Name "SrpState" -Value "1"
