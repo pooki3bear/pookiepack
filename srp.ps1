@@ -258,7 +258,7 @@ function set-shortcut($shortcutname, $action){
     $shell = New-Object -COM WScript.Shell
     $shortcut = $shell.CreateShortcut($shortcutname)
     $shortcut.TargetPath = 'C:\windows\system32\windowspowershell\v1.0\powershell.exe'  ## Target Powershell
-    $string = "Start-Process powershell.exe -argumentlist '-file $action' -Verb RunAs"
+    $string = "Start-Process powershell.exe -argumentlist '-file "$action"' -Verb RunAs"
     $shortcut.Arguments = "$string"
     $shortcut.Description = "Super Safe Shortcut"  ## This is the "Comment" field
     $shortcut.Save()  ## Savep
