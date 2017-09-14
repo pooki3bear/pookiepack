@@ -12,6 +12,8 @@ PookiePack is a set of powershell configuration scripts configure a Windows10 sy
 6. SIT BACK!
 7. type 'restart-computer' in the powershell prompt, or reboot via other means
 
+After the install, you should have 3 new desktop icons that control the local software policy on the machine. To install new software or drivers, toggle it off with the 'srp-off' shortcut. After you make changes you can turn it back on with 'srp-on'. If you have any issues running new programs under the enforced policy, try re-baselining your system with 'srp-set'.
+
 If you decide PookiePack is not the protection profile for you, you can uninstall buy running 'get-pp.ps1 -remove' from a privileged prompt.
 
 PookiePack currently leverages the following 3rd party tools:
