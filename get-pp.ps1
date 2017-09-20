@@ -113,5 +113,4 @@ elseif($remove){
     uninstall
 }
 else {
-    write-host "need switches dummy! e.g. -install or -remove"
 }
