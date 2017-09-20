@@ -32,3 +32,6 @@ https://iwrconsultancy.co.uk/softwarepolicy
 https://www.malwarearchaeology.com/logging/
 
 https://gist.github.com/halkyon/b73fb75e61c37b7ba5f65bb6f3979f00
+
+
+Please reference WHATDO.md for details on everything applied as well as some brief help on customization of the install script. 
