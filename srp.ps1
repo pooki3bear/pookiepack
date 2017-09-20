@@ -29,9 +29,9 @@ $global_whitelist = "C:\Program Files (x86)",
 "C:\Windows\*.exe",
 "C:\Windows\SysWOW64\*.exe",
 "C:\boot\",
-$wd,
 "$env:TEMP\*.ps1",
-"$env:TEMP\*.psm1"
+"$env:TEMP\*.psm1",
+"$wd\*.ps1"
 
 $global_blacklist = "C:\Windows\debug\WIA",
 "C:\Windows\Registration\CRMLog",
@@ -101,7 +101,9 @@ function find-code(){
     Write-Debug "Scanning your machine for code"
     Write-Debug "This may take a while, pookie is a bad programmer"
     $existing_code = get-unique -pathz (get-softpath | Sort-Object)
+    if(!(Test-Path HKLM:\SOFTWARE\SRPBAK\software)){
     New-Item -Path HKLM:\SOFTWARE\SRPBAK\software -Force
+    }
     Set-ItemProperty -Path HKLM:\SOFTWARE\SRPBAK\software -Name "Code" -Value $existing_code -Type MultiString
 
 }
@@ -210,6 +212,7 @@ function toggle-softpol($action){
             Set-ItemProperty -Path HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\CodeIdentifiers -Name DefaultLevel -Value 0x40000 -ErrorAction SilentlyContinue
             if ((get-ItemProperty -Path HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\CodeIdentifiers\ -ErrorAction SilentlyContinue).defaultlevel -eq '0x40000'){Write-Host "toggle SRP off successful!"}
             Remove-Item -Path HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\CodeIdentifiers\0\* -Recurse -ErrorAction SilentlyContinue -Force
+            Remove-Item -Path HKLM:\SOFTWARE\wow6432node\Policies\Microsoft\Windows\Safer\CodeIdentifiers\0\* -Recurse -ErrorAction SilentlyContinue -Force
             Set-ItemProperty -Path HKLM:\SOFTWARE\SRPBAK\software -Name "SrpState" -Value "0"
             reg add HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\DeviceInstall\Restrictions /v DenyUnspecified /f /t REG_DWORD /d 0
         }
@@ -257,17 +260,6 @@ XPI"
     New-ItemProperty -Path HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\CodeIdentifiers -Name ExecutableTypes -PropertyType MultiString -Value $enablekey.ExecutableTypes -Force | Out-Null
 }
 
-function set-shortcut($shortcutname, $action,$path){
-    $shell = New-Object -COM WScript.Shell
-    $cmd = "$path" + " " + $action
-    $shortcut = $shell.CreateShortcut($shortcutname)
-    $shortcut.TargetPath = 'C:\windows\system32\windowspowershell\v1.0\powershell.exe'  ## Target Powershell
-    $string = "Start-Process powershell.exe -argumentlist '-file $cmd' -Verb RunAs"
-    $shortcut.Arguments = "$string"
-    $shortcut.Description = "Super Safe Shortcut"  ## This is the "Comment" field
-    $shortcut.Save()  ## Savep
-}
-
 function set-localHID(){
     reg add HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\DeviceInstall\Restrictions /v AllowDeviceIDs /f /t REG_DWORD /d 1
     $devid += (Get-PnpDevice | Where-Object {$_.class -eq 'Mouse'} | Where-Object {$_.status -eq 'OK'}).instanceid
@@ -283,6 +275,7 @@ function set-localHID(){
 }
 
 function set-srp(){
+    Write-Host "Now scanning local system drives for code, this may take a while depending on your hardware"
     find-code
     Remove-Item HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\CodeIdentifiers\ -Recurse -Force -ErrorAction SilentlyContinue
     $global_whitelist | % {
@@ -297,9 +290,6 @@ function set-srp(){
         make-key -codepath $_ -guid (get-guidz -rnum 1) -act 0
     }
     set-enablekey
-    set-shortcut -shortcutname "$env:ALLUSERSPROFILE\desktop\srp-on.lnk" -action 'tog-on' -path "$wd\srp.ps1"
-    set-shortcut -shortcutname "$env:ALLUSERSPROFILE\desktop\srp-off.lnk" -action 'tog-off' -path "$wd\srp.ps1" 
-    set-shortcut -shortcutname "$env:ALLUSERSPROFILE\desktop\srp-set.lnk" -action 'set' -path "$wd\srp.ps1" 
     reg add "HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings" /t REG_DWORD /v "Enabled" /d "0" /f
     backup-srp
     set-localHID
@@ -310,10 +300,8 @@ function set-srp(){
 
 function unset-srp(){
     reg add "HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings" /t REG_DWORD /v "Enabled" /d "1" /f
-    Remove-Item -Path HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\ -Recurse
-    Remove-Item -Path "$env:ALLUSERSPROFILE\desktop\srp-on.lnk" -Force | Out-Null
-    Remove-Item -Path "$env:ALLUSERSPROFILE\desktop\srp-off.lnk" -Force | Out-Null
-    Remove-Item -Path "$env:ALLUSERSPROFILE\desktop\srp-set.lnk" -Force | Out-Null
+    Remove-Item -Path HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\ -Recurse -ErrorAction SilentlyContinue -Force
+    Remove-Item -Path HKLM:\SOFTWARE\wow6432node\Policies\Microsoft\Windows\Safer\ -Recurse -ErrorAction SilentlyContinue -Force
     Set-ItemProperty -Path HKLM:\SOFTWARE\SRPBAK\software -Name "SrpState" -Value "0"
     reg add HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\DeviceInstall\Restrictions /v DenyUnspecified /f /t REG_DWORD /d 0
 }

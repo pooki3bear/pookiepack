@@ -38,4 +38,19 @@ SRP Operation:
 * If a new application doesn't launch properly, re-baseline the system with srp-set
 
 
-Most settings are applied and removed via a 'set' and 'clear' function respectively. These functions are called in the install() and remove() functions in get-pp.ps1. If you have problems with anything in particular the best way to troubleshoot is to remove pookiepack entirely, comment out the setting in install() with '#' and try installing again. If you have problems with the software restriction policy it can be skipped by commenting ~line 77 which calls srp.ps1 to set the baseline SRP and line ~86 which removes these settings. 
+PookiePack currently leverages the following 3rd party tools:
+
+1. Microsoft EMET 5.5: https://www.microsoft.com/en-us/download/details.aspx?id=50766
+2. Sysinternals Suite:https://technet.microsoft.com/en-us/sysinternals/bb842062.aspx - https://github.com/SwiftOnSecurity/sysmon-config is applied as the baseline.
+
+Lots of guidance considered and applied from:
+
+http://hardenwindows10forsecurity.com/index.html 
+
+http://adsecurity.org/?p=3299 
+
+https://iwrconsultancy.co.uk/softwarepolicy
+
+https://www.malwarearchaeology.com/logging/
+
+https://gist.github.com/halkyon/b73fb75e61c37b7ba5f65bb6f3979f00
