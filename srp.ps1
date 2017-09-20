@@ -192,12 +192,14 @@ function toggle-softpol($action){
                     Set-ItemProperty -Path HKLM:\SOFTWARE\wow6432node\Policies\Microsoft\Windows\Safer\CodeIdentifiers -Name DefaultLevel -Value 0x0
                     if ((get-ItemProperty -Path HKLM:\SOFTWARE\wow6432node\Policies\Microsoft\Windows\Safer\CodeIdentifiers\).defaultlevel -eq '0x0'){Write-Host "toggle SRP on successful!"}
                     Set-ItemProperty -Path HKLM:\SOFTWARE\SRPBAK\software -Name "SrpState" -Value "1"
+                    reg add HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\DeviceInstall\Restrictions /v DenyUnspecified /f /t REG_DWORD /d 1
                 }
                 '32' {
                     reg add "HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings" /t REG_DWORD /v "Enabled" /d "0" /f
                     Set-ItemProperty -Path HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\CodeIdentifiers -Name DefaultLevel -Value 0x0
                     if ((get-ItemProperty -Path HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\CodeIdentifiers\).defaultlevel -eq '0x0'){Write-Host "toggle SRP on successful!"}
                     Set-ItemProperty -Path HKLM:\SOFTWARE\SRPBAK\software -Name "SrpState" -Value "1"
+                    reg add HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\DeviceInstall\Restrictions /v DenyUnspecified /f /t REG_DWORD /d 1
                 }
                 Default {}
             }        
@@ -209,6 +211,7 @@ function toggle-softpol($action){
             if ((get-ItemProperty -Path HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\CodeIdentifiers\ -ErrorAction SilentlyContinue).defaultlevel -eq '0x40000'){Write-Host "toggle SRP off successful!"}
             Remove-Item -Path HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\CodeIdentifiers\0\* -Recurse -ErrorAction SilentlyContinue -Force
             Set-ItemProperty -Path HKLM:\SOFTWARE\SRPBAK\software -Name "SrpState" -Value "0"
+            reg add HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\DeviceInstall\Restrictions /v DenyUnspecified /f /t REG_DWORD /d 0
         }
         Default {Write-Host "need -action 'on' or 'off'"}
     }
@@ -265,6 +268,20 @@ function set-shortcut($shortcutname, $action,$path){
     $shortcut.Save()  ## Savep
 }
 
+function set-localHID(){
+    reg add HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\DeviceInstall\Restrictions /v AllowDeviceIDs /f /t REG_DWORD /d 1
+    $devid += (Get-PnpDevice | Where-Object {$_.class -eq 'Mouse'} | Where-Object {$_.status -eq 'OK'}).instanceid
+    $devid += (Get-PnpDevice | Where-Object {$_.class -eq 'Keyboard'} | Where-Object {$_.status -eq 'OK'}).instanceid
+    $devid += (Get-PnpDevice | Where-Object {$_.class -eq 'HIDClass'} | Where-Object {$_.status -eq 'OK'}).instanceid
+    New-Item HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\AllowDeviceIDs -Force
+    $counter = 1
+    $devid | % {
+    
+        Set-ItemProperty HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\AllowDeviceIDs -Name $counter -Value $_
+    $Counter++
+    }
+}
+
 function set-srp(){
     find-code
     Remove-Item HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\CodeIdentifiers\ -Recurse -Force -ErrorAction SilentlyContinue
@@ -285,7 +302,10 @@ function set-srp(){
     set-shortcut -shortcutname "$env:ALLUSERSPROFILE\desktop\srp-set.lnk" -action 'set' -path "$wd\srp.ps1" 
     reg add "HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings" /t REG_DWORD /v "Enabled" /d "0" /f
     backup-srp
+    set-localHID
     Set-ItemProperty -Path HKLM:\SOFTWARE\SRPBAK\software -Name "SrpState" -Value "1"
+    reg add HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\DeviceInstall\Restrictions /v AllowAdminInstall /f /t REG_DWORD /d 1
+    reg add HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\DeviceInstall\Restrictions /v DenyUnspecified /f /t REG_DWORD /d 1
 }
 
 function unset-srp(){
@@ -295,6 +315,7 @@ function unset-srp(){
     Remove-Item -Path "$env:ALLUSERSPROFILE\desktop\srp-off.lnk" -Force | Out-Null
     Remove-Item -Path "$env:ALLUSERSPROFILE\desktop\srp-set.lnk" -Force | Out-Null
     Set-ItemProperty -Path HKLM:\SOFTWARE\SRPBAK\software -Name "SrpState" -Value "0"
+    reg add HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\DeviceInstall\Restrictions /v DenyUnspecified /f /t REG_DWORD /d 0
 }
 
 switch ($arg)
