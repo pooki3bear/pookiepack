@@ -82,7 +82,7 @@ function uninstall(){
     & $wd\srp.ps1 unset
     clear-wpad
     clear-wdigest
-    clear-netbios
+    #clear-netbios
     #clear-compbrows
     clear-llmnr
     clear-font
