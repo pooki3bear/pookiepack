@@ -12,3 +12,5 @@ PookiePack is a set of powershell configuration scripts configure a Windows10 sy
 6. Click Install in the new GUI
 
 If you decide PookiePack is not the protection profile for you, you can uninstall buy running running the PPGUI icon on your desktop and pressing the Remove button.
+
+Please reference WHATDO.md for details on everything applied as well as some brief help on customization of the install script.
