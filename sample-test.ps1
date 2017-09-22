@@ -1,15 +1,6 @@
 $wd = $SCRIPT:MyInvocation.MyCommand.path | Split-Path -Parent
 Import-Module $wd\pp-mod.psm1
 
-function set-wpad(){
-    reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad" /v "WpadOverride” /f /t REG_DWORD /d "1" | Out-Null
-    Set-Service -Name WinHttpAutoProxySvc -StartupType Disabled
-}
-
-function clear-wpad(){
-    reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad” /v "WpadOverride" /f | Out-Null
-}
-
 function test-wpad($set,$unset){
     if ($set){
         set-wpad
