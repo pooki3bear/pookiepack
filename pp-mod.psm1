@@ -472,11 +472,11 @@ function set-auditpol(){
     Reg add "hklm\System\CurrentControlSet\Control\Lsa" /v "SCENoApplyLegacyAuditPolicy" /f /t REG_DWORD /d 1 
 
     wevtutil sl Security /ms:540100100
-    wevtutil sl Application /ms:256000100
+    wevtutil sl Application /ms:540100100
     wevtutil sl Setup /ms:256000100
     wevtutil sl System /ms:256000100
     wevtutil sl "Windows Powershell" /ms:256000100
-#    wevtutil sl "Microsoft-Windows-Sysmon/Operational" /ms:540100100
+    wevtutil sl "Microsoft-Windows-Sysmon/Operational" /ms:540100100
 
 #######################################################################
 # Account Logon
