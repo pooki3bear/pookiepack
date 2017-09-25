@@ -123,7 +123,7 @@ function set-log(){
     iwr "https://download.sysinternals.com/files/Sysmon.zip" -outfile "$wd\Sysmon.zip"
 	Expand-Archive -path "$wd\Sysmon.zip" -DestinationPath "$wd\Sysmon" -force
 	Copy-Item "$wd\Sysmon\*" "C:\Windows\System32\" -Force
-	Start-Process C:\windows\system32\sysmon.exe -ArgumentList "accepteula -i $wd\tswiz\sysmon-config-master\sysmonconfig-export.xml" -ErrorAction SilentlyContinue
+	Start-Process C:\windows\system32\sysmon.exe -ArgumentList "-accepteula -i $wd\tswiz\sysmon-config-master\sysmonconfig-export.xml" -ErrorAction SilentlyContinue
 	set-auditpol
 }
 
