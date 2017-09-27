@@ -98,12 +98,12 @@ function uninstall(){
 }
 
 if($install){
-    check-pp -install
+    check-pp -install 1
     install
 }
     
 elseif($remove){
-    check-pp -remove
+    check-pp -remove 1
     uninstall
 }
 else {

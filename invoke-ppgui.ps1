@@ -1,5 +1,7 @@
 ﻿# Escalate thru UAC and run PPGUI
 $wd = $SCRIPT:MyInvocation.MyCommand.path | Split-Path -Parent
+$exec = '"' + "$wd\ppgui-mod.ps1" + '"'
+
 function IsAdministrator
 {
     $Identity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
@@ -12,18 +14,20 @@ function IsUacEnabled
     (Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System).EnableLua -ne 0
 }
 
+
+
 if (IsAdministrator){
-    Start-Process PowerShell.exe -Verb Runas -WorkingDirectory $pwd -ArgumentList "-file $wd\ppgui-mod.ps1"
+    Start-Process PowerShell.exe -Verb Runas -WorkingDirectory $wd -ArgumentList "-file $exec"
 }
 elseif (!(IsAdministrator))
 {
     if (IsUacEnabled)
     {
-        Start-Process PowerShell.exe -Verb Runas -WorkingDirectory $pwd -ArgumentList "-file $wd\ppgui-mod.ps1"
+        Start-Process PowerShell.exe -Verb Runas -WorkingDirectory $wd -ArgumentList "-file $exec"
     }
     else
     {
         throw "You must be administrator to run this script"
     }
 }
-Stop-Process -Id $PID
+#Stop-Process -Id $PID

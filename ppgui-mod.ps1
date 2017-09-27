@@ -1,6 +1,7 @@
 ﻿# PP GUI!
 # A hacky attempt at a gui for an even hackier windows project!
 $wd = $SCRIPT:MyInvocation.MyCommand.path | Split-Path -Parent
+#Unblock-File -Path $wd\* 
 Add-Type -AssemblyName System.Windows.Forms
 Import-Module $wd\get-pp.ps1 -Force
 Import-Module $wd\pp-mod.psm1 -Force
@@ -26,33 +27,37 @@ function set-shortcut($shortcutname,$path){
     $shell = New-Object -COM WScript.Shell
     $shortcut = $shell.CreateShortcut($shortcutname)
     $shortcut.TargetPath = 'C:\windows\system32\windowspowershell\v1.0\powershell.exe'  ## Target Powershell
-    $string = "Start-Process powershell.exe -argumentlist '-file $path'"
+    #$string = "Start-Process powershell.exe -argumentlist '-file $path'"
+    $string = "-file $path"
     $shortcut.Arguments = "$string"
     $shortcut.Description = "Super Safe Shortcut"  ## This is the "Comment" field
     $shortcut.Save()  ## Savep
 }
 
 function set-pp(){
+    if ($wd -ne "C:\Program Files\pookiepack"){
+        Copy-Item "$wd\*" "C:\Program Files\pookiepack" -Force -Recurse -ErrorAction Ignore
+        write-host "Relaunching PPGUI in Program Files"
+        Start-Process PowerShell.exe -Verb Runas -WorkingDirectory $pwd -ArgumentList '-file C:\Program Files\pookiepack\invoke-ppgui.ps1'
+        sleep 3
+        #Stop-Process $PID
+    }
+    elseif ($wd -eq "C:\Program Files\pookiepack"){
+        write-host "We're in program files, continuing with install"
+        sleep 3
+    }
     check-pp -install 1
-    if ($wd -eq "C:\windows\system32\pookiepack"){
-        write-host "Please Run invoke-ppgui.ps1 again from source files"
-        sleep 5
-        exit
-    }
-    elseif ($wd -ne "C:\windows\system32\pookiepack"){
-        Copy-Item "$wd\*" "C:\Windows\System32\pookiepack" -Force -Recurse
-    }
     install
-    set-shortcut -shortcutname "$env:ALLUSERSPROFILE\desktop\PPGUI.lnk" -path "C:\windows\system32\pookiepack\invoke-ppgui.ps1"
+    set-shortcut -shortcutname "$env:ALLUSERSPROFILE\desktop\PPGUI.lnk" -path '"C:\Program Files\pookiepack\invoke-ppgui.ps1"'
     get-all
 }
 
 function clear-pp(){
-& $wd\srp.ps1 unset  
-uninstall
-Remove-Item "$env:ALLUSERSPROFILE\desktop\PPGUI.lnk"
-Remove-Item "C:\Windows\System32\pookiepack\" -Recurse -Force -ErrorAction SilentlyContinue
-get-all
+    & $wd\srp.ps1 unset  
+    uninstall
+    Remove-Item "$env:ALLUSERSPROFILE\desktop\PPGUI.lnk"
+    Remove-Item "C:\Program Files\pookiepack\" -Recurse -Force -ErrorAction SilentlyContinue
+    get-all
 }
 
 $ppcp = New-Object system.Windows.Forms.Form
@@ -111,8 +116,8 @@ $button6.Text = "Re-Baseline!"
 $button6.Width = 120
 $button6.Height = 80
 $button6.Add_MouseClick({
- & $wd\srp.ps1 set
- get-all
+    & $wd\srp.ps1 set
+    get-all
 })
 $button6.location = new-object system.drawing.point(140,320)
 $button6.Font = "Arial,10"
@@ -124,8 +129,8 @@ $button7.Text = "Toggle SRP on"
 $button7.Width = 60
 $button7.Height = 40
 $button7.Add_MouseClick({
- & $wd\srp.ps1 tog-on
- get-all
+    & $wd\srp.ps1 tog-on
+    get-all
 })
 $button7.location = new-object system.drawing.point(45,320)
 $button7.Font = "Arial,10"
@@ -137,8 +142,8 @@ $button8.Text = "Toggle SRP off"
 $button8.Width = 60
 $button8.Height = 40
 $button8.Add_MouseClick({
- & $wd\srp.ps1 tog-off
- get-all
+    & $wd\srp.ps1 tog-off
+    get-all
 })
 $button8.location = new-object system.drawing.point(45,360)
 $button8.Font = "Arial,10"
