@@ -82,7 +82,6 @@ function find-code(){
     Write-Debug "Scanning your machine for code"
     Write-Debug "This may take a while, pookie is a bad programmer"
     $existing_code = get-softpath
-    #$existing_code = get-unique -pathz (get-softpath | Sort-Object)
     if(!(Test-Path HKLM:\SOFTWARE\SRPBAK\software)){
     New-Item -Path HKLM:\SOFTWARE\SRPBAK\software -Force
     }
