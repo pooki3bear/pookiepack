@@ -17,9 +17,7 @@ Param
     $arg
 )
 
-$scriploc = $SCRIPT:MyInvocation.MyCommand.path
 $wd = $SCRIPT:MyInvocation.MyCommand.path | Split-Path -Parent
-
 $osarch = if ([System.IntPtr]::Size -eq 4) { "32" } else { "64" }
 
 $global_whitelist = "C:\Program Files (x86)",
@@ -53,37 +51,20 @@ $global_blacklist = "C:\Windows\debug\WIA",
 "iexplore.exe"
 
 function get-softpath(){
+#find all EXE on filesystem except for filtered paths - these will be whiteliseted under SRP baseline
     $pathlist = @()
     $ldisk = Get-WmiObject win32_logicaldisk | Where-Object {$_.DriveType -eq ‘3’}
     $ldisk | % {
-        $fsmap = (gci ($_.DeviceID + "\") -Force -Recurse -ErrorAction SilentlyContinue).FullName
-        #$dllz = $fsmap | Where-Object {$_ -match "\.dll$"} | Where-Object {$_ -notmatch ":\\Windows\\"} | Where-Object {$_ -notmatch "Program Files"}
-        $exez = $fsmap | Where-Object {$_ -match "\.exe$"} | Where-Object {$_ -notmatch ":\\Windows\\"} | Where-Object {$_ -notmatch "Program Files"} | Where-Object {$_ -notmatch "Downloads"} | Where-Object {$_ -notmatch "Documents"}
-        $exez | % {$pathlist += $_}
-        #$dllz | % {$pathlist += $_}
+        $exez = (gci ($_.DeviceID + "\") -Force -Recurse -ErrorAction SilentlyContinue).FullName | Where-Object {$_ -match "\.exe$"}
+        $filtered = $exez | Select-String -NotMatch ":\\Windows\\|Program Files|Downloads|Documents|Recycle\.bin|Temp"
+        $filtered | % {$pathlist += $_}
+        
     }
 $pathlist
 }
 
-function remove-candidate($candidate,$list){
-    $list = $list | Select-String -NotMatch ($candidate -replace '\\','\\'-replace '\+','\+' -replace '\$','\$' -replace '\s','\s')
-    $list
-}
-
-function get-unique($pathz){
-    $masterpath = @()
-    1..$pathz.Count | foreach {
-    if ($pathz){
-    $candidate = Split-Path $pathz[0]
-    $pathz = remove-candidate -candidate $candidate -list $pathz
-    $masterpath += $candidate
-    }
-    }
-    $masterpath
-}
-
-#generator for SRP Registry GUIDs
 function get-guidz($rnum){
+#generator for SRP Registry GUIDs
 $gprefix = "0016bbe0-a716-428b-822e-"
 $guidarray = @()
 1..$rnum | % {
@@ -100,11 +81,12 @@ $guidarray = @()
 function find-code(){
     Write-Debug "Scanning your machine for code"
     Write-Debug "This may take a while, pookie is a bad programmer"
-    $existing_code = get-unique -pathz (get-softpath | Sort-Object)
+    $existing_code = get-softpath
+    #$existing_code = get-unique -pathz (get-softpath | Sort-Object)
     if(!(Test-Path HKLM:\SOFTWARE\SRPBAK\software)){
     New-Item -Path HKLM:\SOFTWARE\SRPBAK\software -Force
     }
-    Set-ItemProperty -Path HKLM:\SOFTWARE\SRPBAK\software -Name "Code" -Value $existing_code -Type MultiString
+    Set-ItemProperty -Path HKLM:\SOFTWARE\SRPBAK\software -Name "Code" -Value $existing_code -Type MultiString -force
 
 }
 
@@ -281,7 +263,6 @@ function set-srp(){
     $global_whitelist | % {
         make-key -codepath $_ -guid (get-guidz -rnum 1) -act 262144
     }
-    
     (Get-ItemProperty -Path HKLM:\SOFTWARE\SRPBAK\software).code | % {
         make-key -codepath $_ -guid (get-guidz -rnum 1) -act 262144
     }
