@@ -28,8 +28,7 @@ $global_whitelist = "C:\Program Files (x86)",
 "C:\Windows\SysWOW64\*.exe",
 "C:\boot\",
 "$env:TEMP\*.ps1",
-"$env:TEMP\*.psm1",
-"$wd\*.ps1"
+"$env:TEMP\*.psm1"
 
 $global_blacklist = "C:\Windows\debug\WIA",
 "C:\Windows\Registration\CRMLog",
@@ -276,6 +275,7 @@ function set-srp(){
     Set-ItemProperty -Path HKLM:\SOFTWARE\SRPBAK\software -Name "SrpState" -Value "1"
     reg add HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\DeviceInstall\Restrictions /v AllowAdminInstall /f /t REG_DWORD /d 1
     reg add HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\DeviceInstall\Restrictions /v DenyUnspecified /f /t REG_DWORD /d 1
+    Write-Host "Done setting SRP"
 }
 
 function unset-srp(){
