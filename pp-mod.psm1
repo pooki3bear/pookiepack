@@ -8,15 +8,6 @@ function new-restore(){
     checkpoint-computer -description "pre-pookiepack"
 }
 
-function get-psv2{
-    get-WindowsOptionalFeature -FeatureName MicrosoftWindowsPowerShellV2 -Online
-}
-
-function set-psv2{
-    Disable-WindowsOptionalFeature -FeatureName MicrosoftWindowsPowerShellV2 -Online | Out-Null
-    Write-Host "powershellv2:" (get-psv2).State.tostring()
-}
-
 function clear-psv2{
     Enable-WindowsOptionalFeature -FeatureName MicrosoftWindowsPowerShellV2 -Online | Out-Null
     Write-Host "powershellv2:" (get-psv2).State.tostring()

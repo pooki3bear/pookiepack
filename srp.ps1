@@ -17,9 +17,7 @@ Param
     $arg
 )
 
-$scriploc = $SCRIPT:MyInvocation.MyCommand.path
 $wd = $SCRIPT:MyInvocation.MyCommand.path | Split-Path -Parent
-
 $osarch = if ([System.IntPtr]::Size -eq 4) { "32" } else { "64" }
 
 $global_whitelist = "C:\Program Files (x86)",
@@ -29,7 +27,6 @@ $global_whitelist = "C:\Program Files (x86)",
 "C:\Windows\*.exe",
 "C:\Windows\SysWOW64\*.exe",
 "C:\boot\",
-$wd,
 "$env:TEMP\*.ps1",
 "$env:TEMP\*.psm1"
 
@@ -53,37 +50,20 @@ $global_blacklist = "C:\Windows\debug\WIA",
 "iexplore.exe"
 
 function get-softpath(){
+#find all EXE on filesystem except for filtered paths - these will be whiteliseted under SRP baseline
     $pathlist = @()
     $ldisk = Get-WmiObject win32_logicaldisk | Where-Object {$_.DriveType -eq ‘3’}
     $ldisk | % {
-        $fsmap = (gci ($_.DeviceID + "\") -Force -Recurse -ErrorAction SilentlyContinue).FullName
-        #$dllz = $fsmap | Where-Object {$_ -match "\.dll$"} | Where-Object {$_ -notmatch ":\\Windows\\"} | Where-Object {$_ -notmatch "Program Files"}
-        $exez = $fsmap | Where-Object {$_ -match "\.exe$"} | Where-Object {$_ -notmatch ":\\Windows\\"} | Where-Object {$_ -notmatch "Program Files"} | Where-Object {$_ -notmatch "Downloads"} | Where-Object {$_ -notmatch "Documents"}
-        $exez | % {$pathlist += $_}
-        #$dllz | % {$pathlist += $_}
+        $exez = (gci ($_.DeviceID + "\") -Force -Recurse -ErrorAction SilentlyContinue).FullName | Where-Object {$_ -match "\.exe$"}
+        $filtered = $exez | Select-String -NotMatch ":\\Windows\\|Program Files|Downloads|Documents|Recycle\.bin|Temp"
+        $filtered | % {$pathlist += $_}
+        
     }
 $pathlist
 }
 
-function remove-candidate($candidate,$list){
-    $list = $list | Select-String -NotMatch ($candidate -replace '\\','\\'-replace '\+','\+' -replace '\$','\$' -replace '\s','\s')
-    $list
-}
-
-function get-unique($pathz){
-    $masterpath = @()
-    1..$pathz.Count | foreach {
-    if ($pathz){
-    $candidate = Split-Path $pathz[0]
-    $pathz = remove-candidate -candidate $candidate -list $pathz
-    $masterpath += $candidate
-    }
-    }
-    $masterpath
-}
-
-#generator for SRP Registry GUIDs
 function get-guidz($rnum){
+#generator for SRP Registry GUIDs
 $gprefix = "0016bbe0-a716-428b-822e-"
 $guidarray = @()
 1..$rnum | % {
@@ -100,9 +80,11 @@ $guidarray = @()
 function find-code(){
     Write-Debug "Scanning your machine for code"
     Write-Debug "This may take a while, pookie is a bad programmer"
-    $existing_code = get-unique -pathz (get-softpath | Sort-Object)
+    $existing_code = get-softpath
+    if(!(Test-Path HKLM:\SOFTWARE\SRPBAK\software)){
     New-Item -Path HKLM:\SOFTWARE\SRPBAK\software -Force
-    Set-ItemProperty -Path HKLM:\SOFTWARE\SRPBAK\software -Name "Code" -Value $existing_code -Type MultiString
+    }
+    Set-ItemProperty -Path HKLM:\SOFTWARE\SRPBAK\software -Name "Code" -Value $existing_code -Type MultiString -force
 
 }
 
@@ -210,6 +192,7 @@ function toggle-softpol($action){
             Set-ItemProperty -Path HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\CodeIdentifiers -Name DefaultLevel -Value 0x40000 -ErrorAction SilentlyContinue
             if ((get-ItemProperty -Path HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\CodeIdentifiers\ -ErrorAction SilentlyContinue).defaultlevel -eq '0x40000'){Write-Host "toggle SRP off successful!"}
             Remove-Item -Path HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\CodeIdentifiers\0\* -Recurse -ErrorAction SilentlyContinue -Force
+            Remove-Item -Path HKLM:\SOFTWARE\wow6432node\Policies\Microsoft\Windows\Safer\CodeIdentifiers\0\* -Recurse -ErrorAction SilentlyContinue -Force
             Set-ItemProperty -Path HKLM:\SOFTWARE\SRPBAK\software -Name "SrpState" -Value "0"
             reg add HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\DeviceInstall\Restrictions /v DenyUnspecified /f /t REG_DWORD /d 0
         }
@@ -257,17 +240,6 @@ XPI"
     New-ItemProperty -Path HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\CodeIdentifiers -Name ExecutableTypes -PropertyType MultiString -Value $enablekey.ExecutableTypes -Force | Out-Null
 }
 
-function set-shortcut($shortcutname, $action,$path){
-    $shell = New-Object -COM WScript.Shell
-    $cmd = "$path" + " " + $action
-    $shortcut = $shell.CreateShortcut($shortcutname)
-    $shortcut.TargetPath = 'C:\windows\system32\windowspowershell\v1.0\powershell.exe'  ## Target Powershell
-    $string = "Start-Process powershell.exe -argumentlist '-file $cmd' -Verb RunAs"
-    $shortcut.Arguments = "$string"
-    $shortcut.Description = "Super Safe Shortcut"  ## This is the "Comment" field
-    $shortcut.Save()  ## Savep
-}
-
 function set-localHID(){
     reg add HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\DeviceInstall\Restrictions /v AllowDeviceIDs /f /t REG_DWORD /d 1
     $devid += (Get-PnpDevice | Where-Object {$_.class -eq 'Mouse'} | Where-Object {$_.status -eq 'OK'}).instanceid
@@ -283,12 +255,12 @@ function set-localHID(){
 }
 
 function set-srp(){
+    Write-Host "Now scanning local system drives for code, this may take a while depending on your hardware"
     find-code
     Remove-Item HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\CodeIdentifiers\ -Recurse -Force -ErrorAction SilentlyContinue
     $global_whitelist | % {
         make-key -codepath $_ -guid (get-guidz -rnum 1) -act 262144
     }
-    
     (Get-ItemProperty -Path HKLM:\SOFTWARE\SRPBAK\software).code | % {
         make-key -codepath $_ -guid (get-guidz -rnum 1) -act 262144
     }
@@ -297,23 +269,19 @@ function set-srp(){
         make-key -codepath $_ -guid (get-guidz -rnum 1) -act 0
     }
     set-enablekey
-    set-shortcut -shortcutname "$env:ALLUSERSPROFILE\desktop\srp-on.lnk" -action 'tog-on' -path "$wd\srp.ps1"
-    set-shortcut -shortcutname "$env:ALLUSERSPROFILE\desktop\srp-off.lnk" -action 'tog-off' -path "$wd\srp.ps1" 
-    set-shortcut -shortcutname "$env:ALLUSERSPROFILE\desktop\srp-set.lnk" -action 'set' -path "$wd\srp.ps1" 
     reg add "HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings" /t REG_DWORD /v "Enabled" /d "0" /f
     backup-srp
     set-localHID
     Set-ItemProperty -Path HKLM:\SOFTWARE\SRPBAK\software -Name "SrpState" -Value "1"
     reg add HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\DeviceInstall\Restrictions /v AllowAdminInstall /f /t REG_DWORD /d 1
     reg add HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\DeviceInstall\Restrictions /v DenyUnspecified /f /t REG_DWORD /d 1
+    Write-Host "Done setting SRP"
 }
 
 function unset-srp(){
     reg add "HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings" /t REG_DWORD /v "Enabled" /d "1" /f
-    Remove-Item -Path HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\ -Recurse
-    Remove-Item -Path "$env:ALLUSERSPROFILE\desktop\srp-on.lnk" -Force | Out-Null
-    Remove-Item -Path "$env:ALLUSERSPROFILE\desktop\srp-off.lnk" -Force | Out-Null
-    Remove-Item -Path "$env:ALLUSERSPROFILE\desktop\srp-set.lnk" -Force | Out-Null
+    Remove-Item -Path HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\ -Recurse -ErrorAction SilentlyContinue -Force
+    Remove-Item -Path HKLM:\SOFTWARE\wow6432node\Policies\Microsoft\Windows\Safer\ -Recurse -ErrorAction SilentlyContinue -Force
     Set-ItemProperty -Path HKLM:\SOFTWARE\SRPBAK\software -Name "SrpState" -Value "0"
     reg add HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\DeviceInstall\Restrictions /v DenyUnspecified /f /t REG_DWORD /d 0
 }
