@@ -109,9 +109,9 @@ $prodir = "$env:windir\system32\WindowsPowerShell\v1.0\profile.ps1"
 
 function set-log(){
     set-profile
-    iwr -uri "https://codeload.github.com/SwiftOnSecurity/sysmon-config/zip/master" -OutFile "$wd\tswiz.zip"
+    #iwr -uri "https://codeload.github.com/SwiftOnSecurity/sysmon-config/zip/master" -OutFile "$wd\tswiz.zip"
 	Expand-Archive -path "$wd\tswiz.zip" -DestinationPath "$wd\tswiz" -force
-    iwr "https://download.sysinternals.com/files/Sysmon.zip" -outfile "$wd\Sysmon.zip"
+    #iwr "https://download.sysinternals.com/files/Sysmon.zip" -outfile "$wd\Sysmon.zip"
 	Expand-Archive -path "$wd\Sysmon.zip" -DestinationPath "$wd\Sysmon" -force
 	Copy-Item "$wd\Sysmon\*" "C:\Windows\System32\" -Force
 	Start-Process C:\windows\system32\sysmon.exe -ArgumentList "-accepteula -i $wd\tswiz\sysmon-config-master\sysmonconfig-export.xml" -ErrorAction SilentlyContinue
@@ -140,33 +140,33 @@ function clear-bb(){
 }
 
 function set-sysinternals(){
-    iwr "https://download.sysinternals.com/files/Autoruns.zip" -outfile "$wd\Autoruns.zip"
+    #iwr "https://download.sysinternals.com/files/Autoruns.zip" -outfile "$wd\Autoruns.zip"
 	Expand-Archive -path "$wd\Autoruns.zip" -DestinationPath "$wd\Autoruns" -force
     Copy-Item "$wd\Autoruns\*" "C:\Windows\System32\" -Force
     
-    iwr "https://download.sysinternals.com/files/ProcessMonitor.zip" -outfile "$wd\ProcessMonitor.zip"
+    #iwr "https://download.sysinternals.com/files/ProcessMonitor.zip" -outfile "$wd\ProcessMonitor.zip"
 	Expand-Archive -path "$wd\ProcessMonitor.zip" -DestinationPath "$wd\ProcessMonitor" -force
     Copy-Item "$wd\ProcessMonitor\*" "C:\Windows\System32\" -Force
     
-    iwr "https://download.sysinternals.com/files/ProcessExplorer.zip" -outfile "$wd\ProcessExplorer.zip"
+    #iwr "https://download.sysinternals.com/files/ProcessExplorer.zip" -outfile "$wd\ProcessExplorer.zip"
 	Expand-Archive -path "$wd\ProcessExplorer.zip" -DestinationPath "$wd\ProcessExplorer" -force
     Copy-Item "$wd\ProcessExplorer\*" "C:\Windows\System32\" -Force
 }
 
 function clear-sysinternals() {
-    iwr "https://download.sysinternals.com/files/Autoruns.zip" -outfile "$wd\Autoruns.zip"
+    #iwr "https://download.sysinternals.com/files/Autoruns.zip" -outfile "$wd\Autoruns.zip"
 	Expand-Archive -path "$wd\Autoruns.zip" -DestinationPath "$wd\Autoruns" -force
     (gci "$wd\Autoruns\").name | %{
     Remove-Item "C:\Windows\System32\$_" -ErrorAction SilentlyContinue
     }
     
-    iwr "https://download.sysinternals.com/files/ProcessMonitor.zip" -outfile "$wd\ProcessMonitor.zip"
+    #iwr "https://download.sysinternals.com/files/ProcessMonitor.zip" -outfile "$wd\ProcessMonitor.zip"
 	Expand-Archive -path "$wd\ProcessMonitor.zip" -DestinationPath "$wd\ProcessMonitor" -force
     (gci "$wd\ProcessMonitor\").name | %{
     Remove-Item "C:\Windows\System32\$_" -ErrorAction SilentlyContinue
     }
 
-    iwr "https://download.sysinternals.com/files/ProcessExplorer.zip" -outfile "$wd\ProcessExplorer.zip"
+    #iwr "https://download.sysinternals.com/files/ProcessExplorer.zip" -outfile "$wd\ProcessExplorer.zip"
 	Expand-Archive -path "$wd\ProcessExplorer.zip" -DestinationPath "$wd\ProcessExplorer" -force
     (gci "$wd\ProcessExplorer\").name | %{
     Remove-Item "C:\Windows\System32\$_" -ErrorAction SilentlyContinue
@@ -217,7 +217,7 @@ function clear-font(){
 }
 
 function set-netbios(){
-    iwr "https://gallery.technet.microsoft.com/Net-Cease-Blocking-Net-1e8dcb5b/file/165596/1/NetCease.zip" -OutFile "$wd\netcease.zip" -ErrorAction SilentlyContinue
+    #iwr "https://gallery.technet.microsoft.com/Net-Cease-Blocking-Net-1e8dcb5b/file/165596/1/NetCease.zip" -OutFile "$wd\netcease.zip" -ErrorAction SilentlyContinue
     Expand-Archive $wd\netcease.zip -DestinationPath $wd\Netcease -Force
     & "$wd\netcease\NetCease.ps1"
 }
@@ -343,7 +343,7 @@ $fontset | Add-Member -Name "Type" -Value "REG_QWORD" -MemberType NoteProperty
 
 $install = {
 $invokeargs = @"
-    /i C:\temp\EMET_Setup.msi /qn
+    /i C:\tools\pookiepack\EMET_Setup.msi /qn
 "@
 $proc = Get-Process | Where-Object {$_.ProcessName -match "EMET_Service"}
 if ($proc)
@@ -355,8 +355,8 @@ else {
     {
     New-Item -Path C:\temp -ItemType Directory
     }
-    $wc = New-Object System.Net.WebClient
-    $wc.DownloadFile("https://download.microsoft.com/download/8/E/E/8EEFD9FC-46B1-4A8B-9B5D-13B4365F8CA0/EMET%20Setup.msi","C:\temp\EMET_Setup.msi")
+    #$wc = New-Object System.Net.WebClient
+    #$wc.DownloadFile("https://download.microsoft.com/download/8/E/E/8EEFD9FC-46B1-4A8B-9B5D-13B4365F8CA0/EMET%20Setup.msi","C:\temp\EMET_Setup.msi")
     Start-Process -FilePath msiexec -Wait -ArgumentList $invokeargs
     New-Item -Path HKLM:\SOFTWARE\Policies\Microsoft\EMET\Defaults -Type Directory -ErrorAction SilentlyContinue
     New-Item -Path HKLM:\SOFTWARE\Policies\Microsoft\EMET\SysSettings -Type Directory -ErrorAction SilentlyContinue
@@ -371,7 +371,7 @@ else {
     if (!$proc)
     {Start-Service EMET_Service}
     Get-Process | Where-Object {$_.ProcessName -match "EMET_Service"}
-    Remove-Item -Path C:\temp\EMET_Setup.msi
+    #Remove-Item -Path C:\temp\EMET_Setup.msi
 }
 }
 $uninstall = {
