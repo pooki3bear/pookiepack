@@ -46,7 +46,7 @@ function set-network(){
     {
         reg add HKLM\SYSTEM\CurrentControlSet\Services\tcpip6\Parameters /t REG_DWORD /d 0xff /v DisabledComponents /f
         reg add HKLM\Software\Microsoft\DirectplayNATHelp\DPNHUPnP /t REG_DWORD /d 2 /v UPnPMode /f
-        Set-SmbServerConfiguration -EnableSMB2Protocol $False -Force
+        #Set-SmbServerConfiguration -EnableSMB2Protocol $False -Force
         Set-SmbServerConfiguration -EnableSMB1Protocol $False -Force
         Set-SmbClientConfiguration -EnableSecuritySignature $true -Force
         Write-debug "successfully applied network settings"
@@ -608,9 +608,9 @@ New-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer
 Get-AppxProvisionedPackage -Online | Remove-AppxProvisionedPackage -Online
 #Get-AppxPackage | Remove-AppxPackage
 
-# Disable Cortana, and disable any kind of web search or location settings.
+# disable any kind of web search or location settings.
 New-Item -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\' -Name 'Windows Search' -ErrorAction SilentlyContinue
-New-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' -Name 'AllowCortana' -PropertyType DWord -Value '0' -Force
+#New-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' -Name 'AllowCortana' -PropertyType DWord -Value '0' -Force
 New-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' -Name 'AllowSearchToUseLocation' -PropertyType DWord -Value '0' -Force
 New-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' -Name 'DisableWebSearch' -PropertyType DWord -Value '1' -Force
 New-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' -Name 'ConnectedSearchUseWeb' -PropertyType DWord -Value '0' -Force
@@ -735,7 +735,7 @@ powercfg -h off
 Write-Host 'Disabling optional features...'
 $features = @(
     'MediaPlayback',
-    #'SMB1Protocol',
+    'SMB1Protocol',
     'Xps-Foundation-Xps-Viewer',
     'WorkFolders-Client',
     #'WCF-Services45',
@@ -898,7 +898,7 @@ powercfg -h off
 Write-Host 'Disabling optional features...'
 $features = @(
     'MediaPlayback',
-    #'SMB1Protocol',
+    'SMB1Protocol',
     'Xps-Foundation-Xps-Viewer',
     'WorkFolders-Client',
     'WCF-Services45',
